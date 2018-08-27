@@ -20,10 +20,9 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
         <set-session-variable variableName="destination" value="#[message.inboundProperties.'http.query.params'.destination]" doc:name="Session Variable"/>
         <choice doc:name="Choice">
             <when expression="#[sessionVars.destination!=empty]">
-                <set-property propertyName="dest" value="#[sessionVars.destination]" doc:name="Property"/>
-                <http:request config-ref="HTTP_Request_Configuration" path="system/getFlights" method="GET" doc:name="HTTP getFlightsFlow">
+                <http:request config-ref="HTTP_Request_Configuration" path="system/deltaByDestination" method="GET" doc:name="HTTP getFlightsFlow">
                     <http:request-builder>
-                        <http:query-param paramName="destination" value="#[message.outboundProperties.dest]"/>
+                        <http:query-param paramName="destination" value="#[message.inboundProperties.'http.query.params'.destination]"/>
                     </http:request-builder>
                 </http:request>
             </when>
@@ -31,19 +30,21 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
                 <flow-ref name="getAllFlightsFlowSys" doc:name="getAllFlightsFlowSys"/>
             </otherwise>
         </choice>
+        <logger level="INFO" doc:name="Logger"/>
 
     </flow>
     <flow name="getAllFlightsFlowSys">
-        <http:request config-ref="HTTP_Request_Configuration" path="system/getAllFlights" method="GET" doc:name="HTTP"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="system/delta" method="GET" doc:name="HTTP"/>
+        <logger level="INFO" doc:name="Logger"/>
     </flow>
     <flow name="getBothWebServices">
         <scatter-gather doc:name="Scatter-Gather">
             <processor-chain>
-                <http:request config-ref="HTTP_Request_Configuration" path="system/getAllFlights" method="GET" doc:name="HTTP"/>
+                <http:request config-ref="HTTP_Request_Configuration" path="system/delta" method="GET" doc:name="HTTP"/>
                 <logger level="INFO" doc:name="Logger"/>
             </processor-chain>
             <processor-chain>
-                <http:request config-ref="HTTP_Request_Configuration" path="system/getAllFlightsREST" method="GET" doc:name="HTTP"/>
+                <http:request config-ref="HTTP_Request_Configuration" path="system/united" method="GET" doc:name="HTTP"/>
                 <logger level="INFO" doc:name="Logger"/>
             </processor-chain>
         </scatter-gather>
@@ -52,7 +53,7 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 %output application/json
 ---
 
-flatten payload
+flights: flatten payload
 
 ]]></dw:set-payload>
         </dw:transform-message>
