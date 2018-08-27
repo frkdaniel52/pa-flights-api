@@ -17,6 +17,7 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
     </flow>
 
     <flow name="getFlightsFlow">
+        <logger level="INFO" doc:name="Logger"/>
         <set-session-variable variableName="destination" value="#[message.inboundProperties.'http.query.params'.destination]" doc:name="Session Variable"/>
         <choice doc:name="Choice">
             <when expression="#[sessionVars.destination!=empty]">
@@ -35,7 +36,6 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
     </flow>
     <flow name="getAllFlightsFlowSys">
         <http:request config-ref="HTTP_Request_Configuration" path="system/delta" method="GET" doc:name="HTTP"/>
-        <logger level="INFO" doc:name="Logger"/>
     </flow>
     <flow name="getBothWebServices">
         <scatter-gather doc:name="Scatter-Gather">
